@@ -1,0 +1,7 @@
+# external requirements
+
+pandas
+numpy
+tensorflow
+matplotlib
+opencv-contrib-python
