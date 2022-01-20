@@ -1,4 +1,4 @@
-# American_Sign_Language_Recognizer
+# American Sign Language Recognizer
 
 ## Used datasets
 
