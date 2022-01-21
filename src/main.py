@@ -15,7 +15,8 @@ device_lib.list_local_devices()
 # %% var
 data_path = Path('data/raw')
 train_path = data_path.joinpath('asl_alphabet_train/asl_alphabet_train')
-test_path = data_path.joinpath('asl-alphabet-test')
+train_path = data_path.joinpath('asl-own')
+# test_path = data_path.joinpath('asl-alphabet-test')
 models_path = Path('models')
 
 # %% generators
@@ -30,6 +31,7 @@ data_generator = ImageDataGenerator(
     validation_split=0.1
 )
 valid_generator = ImageDataGenerator(
+    rescale=1 / 255.0,
     validation_split=0.1
 )
 
@@ -38,7 +40,7 @@ train_gen = data_generator.flow_from_directory(
     target_size=(200, 200),
     color_mode="rgb",
     batch_size=64,
-    class_mode="categorical",
+    class_mode="sparse",
     seed=2022,
     subset="training"
 )
@@ -47,7 +49,7 @@ valid_gen = valid_generator.flow_from_directory(
     target_size=(200, 200),
     color_mode="rgb",
     batch_size=64,
-    class_mode="categorical",
+    class_mode="sparse",
     seed=2022,
     subset="validation"
 )
@@ -88,14 +90,14 @@ model.add(tf.keras.layers.Conv2D(256, (3, 3), activation="relu", padding="same")
 
 model.add(tf.keras.layers.Flatten())
 
-model.add(tf.keras.layers.Dense(2048, activation="relu"))
+model.add(tf.keras.layers.Dense(1500, activation="relu"))
 # model.add(tf.keras.layers.Dense(128, activation="relu"))
 model.add(tf.keras.layers.Dropout(0.5))
 
-model.add(tf.keras.layers.Dense(29, activation="softmax"))
+model.add(tf.keras.layers.Dense(26, activation="softmax"))
 
 opt = tf.keras.optimizers.Adam(learning_rate=0.0001)
-model.compile(optimizer=opt, loss="categorical_crossentropy", metrics=['accuracy'])
+model.compile(optimizer=opt, loss="sparse_categorical_crossentropy", metrics=['accuracy'])
 model.summary()
 
 # %% Fit
@@ -109,7 +111,7 @@ model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
 history = model.fit(train_gen,
                     epochs=999,
                     validation_data=valid_gen,
-                    callbacks=[model_checkpoint_callback, tf.keras.callbacks.EarlyStopping(patience=5)],
+                    callbacks=[model_checkpoint_callback, tf.keras.callbacks.EarlyStopping(patience=2)],
                     workers=20)
 
 # %% Plot
