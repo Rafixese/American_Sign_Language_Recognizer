@@ -29,6 +29,9 @@ data_generator = ImageDataGenerator(
     zoom_range=0.2,
     validation_split=0.1
 )
+valid_generator = ImageDataGenerator(
+    validation_split=0.1
+)
 
 train_gen = data_generator.flow_from_directory(
     directory=train_path,
@@ -39,7 +42,7 @@ train_gen = data_generator.flow_from_directory(
     seed=2022,
     subset="training"
 )
-valid_gen = data_generator.flow_from_directory(
+valid_gen = valid_generator.flow_from_directory(
     directory=train_path,
     target_size=(200, 200),
     color_mode="rgb",
@@ -49,7 +52,7 @@ valid_gen = data_generator.flow_from_directory(
     subset="validation"
 )
 classes = list(train_gen.class_indices.keys())
-
+print(classes)
 
 def decode_class(cls, one_hot):
     return cls[np.argmax(one_hot)]
@@ -85,9 +88,9 @@ model.add(tf.keras.layers.Conv2D(256, (3, 3), activation="relu", padding="same")
 
 model.add(tf.keras.layers.Flatten())
 
-model.add(tf.keras.layers.Dense(1024, activation="relu"))
+model.add(tf.keras.layers.Dense(2048, activation="relu"))
 # model.add(tf.keras.layers.Dense(128, activation="relu"))
-model.add(tf.keras.layers.Dropout(0.2))
+model.add(tf.keras.layers.Dropout(0.5))
 
 model.add(tf.keras.layers.Dense(29, activation="softmax"))
 
@@ -99,16 +102,15 @@ model.summary()
 model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=models_path.joinpath('{epoch:02d}-{val_loss:.2f}.hdf5'),
     save_weights_only=False,
-    monitor='val_loss',
+    monitor='val_accuracy',
     mode='max',
-    save_best_only=True)
+    save_best_only=False)
 
 history = model.fit(train_gen,
                     epochs=999,
                     validation_data=valid_gen,
                     callbacks=[model_checkpoint_callback, tf.keras.callbacks.EarlyStopping(patience=5)],
-                    workers=20,
-                    use_multiprocessing=True)
+                    workers=20)
 
 # %% Plot
 training_loss = history.history['loss']
