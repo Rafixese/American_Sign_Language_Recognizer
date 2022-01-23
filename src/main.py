@@ -26,7 +26,6 @@ data_generator = ImageDataGenerator(
     horizontal_flip=True,
     fill_mode='nearest',
     rescale=1 / 255.0,
-    brightness_range=(0.75, 1.3),
     zoom_range=0.2,
     validation_split=0.1
 )
