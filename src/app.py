@@ -8,7 +8,7 @@ vid = cv2.VideoCapture(0)
 vid.set(cv2.CAP_PROP_FRAME_WIDTH, 200)
 vid.set(cv2.CAP_PROP_FRAME_HEIGHT, 200)
 print('Loading model')
-model = tf.keras.models.load_model('models/09-0.11.hdf5')
+model = tf.keras.models.load_model('models/04-0.34.hdf5')
 print('Model loaded')
 
 
@@ -34,7 +34,7 @@ while (True):
     if char != last_char:
         last_char = char
         char_time_start = time.time()
-    if (time.time() - char_time_start) > 1.0:
+    if (time.time() - char_time_start) > 2.0:
         text += char
         char_time_start = time.time()
     frame = cv2.putText(frame,
@@ -53,7 +53,13 @@ while (True):
                         color=(0, 255, 0))
     cv2.imshow('frame', frame)
     # i += 1
-    if cv2.waitKey(1) & 0xFF == ord('q') or i > 2000:
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('a'):
+        text += char
+        char_time_start = time.time()
+    if key == ord('s'):
+        text = text[:-1]
+    if key == ord('q') or i > 2000:
         break
 
 vid.release()
